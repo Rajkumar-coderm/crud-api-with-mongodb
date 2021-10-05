@@ -1,5 +1,6 @@
 const db = require('./post.model');
 const udb = require('../users/user.model')
+const lidb=require('./likes.model')
 
 exports.createPost = async (req, res) => {
     try {
@@ -74,3 +75,59 @@ exports.removePost = async (req, res) => {
         console.log(error);
     }
 }
+
+exports.likePost=async (req,res)=>{
+    try {
+        const likes={
+            userId:req.data._id,
+            postId:req.body.id 
+        }
+        await lidb.insertMany(likes)
+        .then((data)=>{
+            res.status(200).json({message:data})
+        }).catch((err)=>{
+            res.status(404).json({error:err.message})
+        })
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+exports.getAllLikes=async (req,res)=>{
+    try {
+        const data=lidb.find()
+        res.status(200).json({likes:data})
+    } catch (error) {
+       console.log(error); 
+    }
+};
+
+exports.getAllcomments=async (req,res)=>{
+    try {
+       const data= await db.find({_id:req.body._id},{comments:1})
+       res.send(data)
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+exports.getDetail=async (req,res)=>{
+
+    try {
+        const user=await udb.find()
+        const post=await db.find()
+        const liked= await lidb.find()
+        const data={
+            userId:user[0]._id,
+            Postid:post[0]._id,
+            Liked:liked
+        }
+        res.status(200).json({datail:data})
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
+

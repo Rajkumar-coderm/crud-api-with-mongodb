@@ -1,13 +1,24 @@
 const bcrypt = require('bcrypt');
 const db = require("./user.model");
+const pdb=require('../posts/post.model')
 const jwt = require("jsonwebtoken")
 
 
 
 exports.getUser = async (req, res) => {
     try {
-        const allUser = await db.find({}, { name: 1, email: 1, mobile: 1 })
-        res.status(200).json({ data: allUser })
+        await db.aggregate([{
+            $lookup: {
+                from: "posts",
+                localField: "posts",
+                foreignField: "user.id",
+                as: "user"
+            }
+        }]).then((allUser)=>{
+            res.status(200).json({ data: allUser})
+        }).catch((err)=>{
+            console.log(err);
+        })
     } catch (error) {
         console.log(error);
     }
